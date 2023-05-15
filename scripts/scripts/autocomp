@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# simple compiler utility
+
+pkill -f "entr compiler" && exit
+ls "$1" | entr -c compiler "$1"

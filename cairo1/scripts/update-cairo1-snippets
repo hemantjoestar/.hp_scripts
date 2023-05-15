@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Usage: update-snippets input_file marker append_file
+
+input_file="$1"
+marker="$2"
+append_file="$3"
+
+# Check if the necessary files are provided
+if [ -z "$input_file" ] || [ -z "$marker" ] || [ -z "$append_file" ]; then
+  echo "Usage: update-snippets input_file marker append_file"
+  exit 1
+fi
+
+# Check if input_file and append_file exist
+if [ ! -f "$input_file" ]; then
+  echo "Error: input_file does not exist"
+  exit 1
+fi
+
+if [ ! -f "$append_file" ]; then
+  echo "Error: append_file does not exist"
+  exit 1
+fi
+
+# Find the marker line number
+marker_line=$(grep -n -m 1 "$marker" "$input_file" | cut -d: -f1)
+
+if [ -z "$marker_line" ]; then
+  echo "Error: marker not found in input_file"
+  exit 1
+fi
+
+# Create a temporary output file
+temp_output_file=$(mktemp)
+
+# Split the input file at the marker line
+head -n "$marker_line" "$input_file" > "$temp_output_file"
+
+# Append the contents of append_file after the marker
+cat "$append_file" >> "$temp_output_file"
+
+# Replace the input file with the temporary output file
+mv "$temp_output_file" "$input_file"
+
+echo "Operation completed: $input_file has been updated"
+

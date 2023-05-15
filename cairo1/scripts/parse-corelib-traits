@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# TODO: Dont call alone. will destroy stuff. Fix this
+
+working_folder="$1"
+cd $working_folder
+mkdir -p .cairo1_vim
+
+# Replace `tags_file` with the path to your ctags file
+ctags_file="./corelib_tags.tags"
+# Output files
+corelib_completions_file="./.cairo1_vim/corelib_completions.txt"
+corelib_traits_snippets="./.cairo1_vim/cairo1.snippets"
+
+# Clear the output files
+> $corelib_completions_file
+> $corelib_traits_snippets
+
+# Read the ctags file line by line
+while read -r line; do
+  # Check if the line ends with 't'
+  if [[ $line =~ .*\;\"[[:space:]]t$ ]]; then
+    # Extract the required strings
+    trait_name=$(echo "$line" | awk -F'\t' '{print $1}')
+    file_path=$(echo "$line" | awk -F'\t' '{print $2}')
+    array_name=$(basename "$file_path" | cut -d '.' -f1)
+
+    # Append the trait_name in lowercase to corelib_completions_file
+    echo "${trait_name,,}" >> $corelib_completions_file
+
+    # Append the snippet to corelib_traits_snippets
+    echo "snippet ${trait_name,,} \"$trait_name\" b" >> $corelib_traits_snippets
+    echo "use $array_name::${trait_name};" >> $corelib_traits_snippets
+    echo "endsnippet" >> $corelib_traits_snippets
+    echo "" >> $corelib_traits_snippets
+  fi
+done < $ctags_file

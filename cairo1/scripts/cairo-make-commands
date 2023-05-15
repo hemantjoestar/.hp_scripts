@@ -1,0 +1,53 @@
+#!/bin/bash
+
+set -o pipefail
+cairo-watch-header
+# Function to execute commands and handle errors
+execute_command() {
+  local command="$1"
+  local fallback_command="$2"
+  local stdout_output stderr_output
+  eval "$command"
+  # # Run the command and capture stdout and stderr separately
+  # eval "$command" > >(tee >(stdout_output=$(cat))) 2> >(tee >(stderr_output=$(cat)) >&2)
+
+  # if [ $? -eq 0 ] && [ -z "$stderr_output" ]; then
+
+  # 	echo "$command executed successfully."
+  # else
+  # 	# echo "Error: Command failed at line $LINENO"
+  # 	# echo "Command output:"
+  # 	# echo "--------------------------------"
+  # 	# echo "$stderr_output"
+  # 	# echo "--------------------------------"
+  # 	echo "Executing fallback command..."
+  # 	eval "$fallback_command"
+  # fi
+}
+
+if [ $# -eq 0 ]; then
+  command="make"
+else
+  ARGS="$@"
+  command="make test_with_args ARGS=\"$ARGS\""
+fi
+
+# Replace 'your_fallback_command' with the actual fallback command you want to run
+fallback_command="cairo-format src/** --print-parsing-errors"
+
+# Execute commands
+execute_command "$command" "$fallback_command"
+
+##!/bin/bash
+
+#set -e
+#set -o pipefail
+
+#trap 'echo "Error: Command failed at line $LINENO"; exit 1' ERR
+
+#if [ $# -eq 0 ]; then
+#  make
+#else
+#  ARGS="$@"
+#  make test_with_args ARGS="$ARGS"
+#fi

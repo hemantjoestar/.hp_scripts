@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# navigate to $home some wierd breaks
+cd $HOME
+
+# Variables
+repo_url="git@github.com:starkware-libs/cairo.git"
+destination_folder=$HOME"/apps/bin/cairo1/starkware/cairo1"
+
+# Clean
+sudo rm -rf "$destination_folder" 
+
+# Download the latest version of the repo
+git clone "$repo_url" "$destination_folder"
+
+# Navigate to the repo folder
+cd "$destination_folder"
+# Print the commit hash of the latest commit
+echo "Latest commit hash: $(git rev-parse HEAD)"
+
+cargo build --all --release
+
+# run ctags
+rm -rf .cairo1_vim
+mkdir -p .cairo1_vim
+
+ctags -u -R -f "$destination_folder/corelib_tags.tags" corelib 
+# to prevent mistakenly editing corelib
+# done inside of vim 
+
+parse-corelib-traits $destination_folder
+update-cairo1-snippets ~/.vim/UltiSnips/cairo1.snippets "##CORELIB##" $destination_folder/.cairo1_vim/cairo1.snippets
