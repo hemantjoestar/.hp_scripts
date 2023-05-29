@@ -1,39 +1,46 @@
 #!/bin/bash
 set -o pipefail
 cairo-watch-header
+
 # Function to execute commands and handle errors
 execute_command() {
-  local command="$1"
-  local fallback_command="$2"
-  local stdout_output stderr_output
-  eval "$command"
-  # # Run the command and capture stdout and stderr separately
-  # eval "$command" > >(tee >(stdout_output=$(cat))) 2> >(tee >(stderr_output=$(cat)) >&2)
-
-  # if [ $? -eq 0 ] && [ -z "$stderr_output" ]; then
-
-  # 	echo "$command executed successfully."
-  # else
-  # 	# echo "Error: Command failed at line $LINENO"
-  # 	# echo "Command output:"
-  # 	# echo "--------------------------------"
-  # 	# echo "$stderr_output"
-  # 	# echo "--------------------------------"
-  # 	echo "Executing fallback command..."
-  # 	eval "$fallback_command"
-  # fi
+	local command="$1"
+	local output
+	output=$(eval "$command" 2>&1)
+	status=$?
+	if [ $status -ne 0 ]; then
+		# Need to see all errors
+		echo -e "\033[31mTESTING ERROR\033[0m"
+		# Only which tests failed
+		echo "$output" | awk '/failures:/,/make: \*\*\* .* Error/'
+		exit 1
+	else
+		# Command exited successfully
+		echo -e "\033[32mALL TEST PASS\033[0m"
+		# echo "$output"
+	fi
 }
 
 if [ $# -eq 0 ]; then
-	# verbose output
-  command="make 2>&1 | head -n 15"
+	command="make"
 else
-  ARGS="$@"
-  command="make test_with_args ARGS=\"$ARGS\""
+	ARGS="$@"
+	command="make test_with_args ARGS=\"$ARGS\""
 fi
 
-# Replace 'your_fallback_command' with the actual fallback command you want to run
-fallback_command="cairo-format src/** --print-parsing-errors"
+# Execute command
+# execute_command "make compile"
 
-# Execute commands
-execute_command "$command" "$fallback_command"
+output=$(eval "make compile" 2>&1)
+status=$?
+if [ $status -ne 0 ]; then
+	# I dont want to see all errors
+	echo -e "\033[31mCOMPILATION ERROR\033[0m"
+	echo "$output" | head -n 15
+	exit 1
+else
+	# Command exited successfully
+	echo -e "\033[32mCOMPILATION OK\033[0m"
+	# echo "$output"
+fi
+execute_command "$command"

@@ -4,15 +4,26 @@ set -o pipefail
 starknet-watch-header
 # Function to execute commands and handle errors
 execute_command() {
-  local command="$1"
-  eval "$command"
+	local command="$1"
+	local output
+	output=$(eval "$command" 2>&1)
+	status=$?
+	if [ $status -ne 0 ]; then
+		# Command exited with an error status
+		echo -e "\033[31mERROR\033[0m"
+		echo "$output" | head -n 10
+	else
+		# Command exited successfully
+		echo "$output"
+	fi
 }
+
 if [ $# -eq 0 ]; then
-	# verbose output
-  command="make 2>&1 | head -n 15"
+	command="make"
 else
-  ARGS="$@"
-  command="make test_with_args ARGS=\"$ARGS\""
+	ARGS="$@"
+	command="make test_with_args ARGS=\"$ARGS\""
 fi
-# Execute commands
+
+# Execute command
 execute_command "$command"

@@ -18,15 +18,15 @@ default: test format
 
 # Test the project
 test:
-	cairo-test --starknet .
+	@cairo-test --starknet .
 
 test_with_args:
-	cairo-test --starknet  . $(ARGS)
+	@cairo-test --starknet  . $(ARGS)
 
 format:
-	cairo-format --recursive src/*
+	@cairo-format --recursive src/*
 
 compile:
-	mkdir -p artifacts
-	starknet-compile --allowed-libfuncs-list-name experimental_v0.1.0 . artifacts/$(PROJECT_NAME).json
+	@mkdir -p artifacts
+	@starknet-compile --allowed-libfuncs-list-name experimental_v0.1.0 . artifacts/$(PROJECT_NAME).json
 EOL

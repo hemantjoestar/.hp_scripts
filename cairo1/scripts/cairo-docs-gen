@@ -52,5 +52,5 @@ for file in "$output_dir"/*.adoc; do
 done
 
 # Convert the master document to PDF and suppress the output
-asciidoctor-pdf "$output_dir/$output_file.adoc" -o "$output_dir/$output.pdf" > /dev/null 2>&1
+asciidoctor-pdf "$output_dir/$output_file.adoc" -o "$output_dir/$output_file.pdf" > /dev/null 2>&1
 echo "Operation completed: $output_file.pdf has been generated"
