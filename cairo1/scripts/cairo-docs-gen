@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Specify the output directory
+output_dir="./output"
+output_file="cairo-corelib-docs"
+mkdir -p "$output_dir"
+
+# Array of file paths to process
+files=("./docs/reference/src/components/cairo/modules/language_constructs/pages/aliases.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/contracts.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/derive-macro.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/enums.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/felt252dict-type.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/functions.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/generics.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/keywords.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/linear-types.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/literal-expressions.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/match-expressions.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/method-calls.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/modules-and-source-files.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/naming-conventions.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/negation-operators.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/panic.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/path.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/structs.adoc"	
+	"./docs/reference/src/components/cairo/modules/language_constructs/pages/traits.adoc"	
+)
+
+# Copy each file to the output directory
+for file in "${files[@]}"; do
+	if [ -f "$file" ]; then
+		cp "$file" "$output_dir/"
+	else
+		echo -e "\e[31mError: File $file not found.\e[0m"
+	fi
+done
+
+# Generate a master document with includes for all .adoc files in the output directory
+echo "= Document Title" > "$output_dir/$output_file.adoc"
+echo "Author Name" >> "$output_dir/$output_file.adoc"
+echo ":doctype: book" >> "$output_dir/$output_file.adoc"
+echo ":toc: left" >> "$output_dir/$output_file.adoc"
+echo ":sectlinks:" >> "$output_dir/$output_file.adoc"
+echo "" >> "$output_dir/$output_file.adoc"
+
+for file in "$output_dir"/*.adoc; do
+	if [ "$(basename "$file")" != "$output_file.adoc" ]; then
+		echo "[[file$(basename "$file" .adoc)]]" >> "$output_dir/$output_file.adoc"
+		echo "include::$(basename "$file")[]" >> "$output_dir/$output_file.adoc"
+	fi
+done
+
+# Convert the master document to PDF and suppress the output
+asciidoctor-pdf "$output_dir/$output_file.adoc" -o "$output_dir/$output.pdf" > /dev/null 2>&1
+echo "Operation completed: $output_file.pdf has been generated"

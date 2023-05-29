@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -o pipefail
+starknet-watch-header
+# Function to execute commands and handle errors
+execute_command() {
+  local command="$1"
+  eval "$command"
+}
+if [ $# -eq 0 ]; then
+	# verbose output
+  command="make 2>&1 | head -n 15"
+else
+  ARGS="$@"
+  command="make test_with_args ARGS=\"$ARGS\""
+fi
+# Execute commands
+execute_command "$command"

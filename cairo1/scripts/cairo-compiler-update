@@ -28,5 +28,11 @@ ctags -u -R -f "$destination_folder/corelib_tags.tags" corelib
 # to prevent mistakenly editing corelib
 # done inside of vim 
 
+# ALERT: Require specific folder location to work. will fix later
+# Specifically in the cairo folder root
+# Prepare the completions and Snippets for Ultisnips
 parse-corelib-traits $destination_folder
+# Update Ultisnips file after marker
 update-cairo1-snippets ~/.vim/UltiSnips/cairo1.snippets "##CORELIB##" $destination_folder/.cairo1_vim/cairo1.snippets
+# Generate docs for refernce. commands provided in corelib dont work
+cairo-docs-gen

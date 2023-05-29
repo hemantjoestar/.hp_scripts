@@ -1,0 +1,17 @@
+#!/bin/bash
+
+ARGS="$@"
+
+# Replace 'path/to/your/files' with the actual path to the files you want to watch
+FILES_TO_WATCH="./src"
+
+# Replace 'path/to/script_2.sh' with the actual path to the second script
+if [ $# -eq 0 ]; then
+  COMMAND="starknet-make-commands"
+else
+  COMMAND="starknet-make-commands $ARGS"
+fi
+
+# Kill all instances of entr
+pkill -f entr || true
+find $FILES_TO_WATCH | entr -c -d -s "$COMMAND"

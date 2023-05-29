@@ -1,0 +1,32 @@
+#!/bin/bash
+if [ "$#" -ne 1 ]; then
+  echo "Usage: Starknet-new <project-name>"
+  exit 1
+fi
+
+PROJECT_NAME=$1
+mkdir $PROJECT_NAME
+
+# Create Makefile
+cat > "${PROJECT_NAME}/Makefile" << 'EOL'
+PROJECT_NAME := $(shell echo $$PROJECT_NAME)
+
+.PHONY: default
+
+# Default target
+default: test format
+
+# Test the project
+test:
+	cairo-test --starknet .
+
+test_with_args:
+	cairo-test --starknet  . $(ARGS)
+
+format:
+	cairo-format --recursive src/*
+
+compile:
+	mkdir -p artifacts
+	starknet-compile --allowed-libfuncs-list-name experimental_v0.1.0 . artifacts/$(PROJECT_NAME).json
+EOL

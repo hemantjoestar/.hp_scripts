@@ -1,0 +1,77 @@
+#!/bin/bash
+
+# Function to display usage
+function usage() {
+  echo "Usage: $0 <git repo url> [commit hash]"
+}
+
+# Check if minimum number of arguments (1) is passed
+if [ "$#" -lt 1 ]; then
+  usage
+  exit 1
+fi
+
+# Variables
+GIT_REPO=$1
+COMMIT_HASH=$2
+REPO_DIR="$(basename "$GIT_REPO" .git)"
+DEPENDENCY_FOLDER="./deps"
+FOLDER=$DEPENDENCY_FOLDER.$REPO_DIR
+
+# Check for existence of cairo_project.toml
+if [ ! -f "cairo_project.toml" ]; then
+  echo "cairo_project.toml does not exist. Please check the current directory."
+  exit 1
+fi
+
+mkdir -p deps
+# Check if repo already downloaded
+if [ -d "$FOLDER" ]; then
+    echo "Git repo '$FOLDER' already installed."
+    exit 1
+fi
+# Clone the git repository
+git submodule add -f  "$GIT_REPO" "$FOLDER"
+if [ "$?" -ne 0 ]; then
+  echo "Failed to clone repository. Please check the URL."
+  exit 1
+fi
+
+cd "$FOLDER"
+
+# Checkout a specific commit if it's provided
+if [ ! -z "$COMMIT_HASH" ]; then
+  git checkout "$COMMIT_HASH"
+  if [ "$?" -ne 0 ]; then
+    echo "Failed to checkout commit. Please check the commit hash."
+    cd ..
+    rm -rf "$REPO_DIR"
+    exit 1
+  fi
+fi
+
+# TODO: Check if starknet or cairo repo and test accordingly
+if [ -f "src/tests.cairo" ]; then
+  cairo-test .
+  if [ "$?" -ne 0 ]; then
+    echo "cairo-test failed. Please check the Cairo tests."
+    cd ..
+    # rm -rf "$REPO_DIR"
+    exit 1
+  fi
+else
+  cairo-test --starknet .
+  if [ "$?" -ne 0 ]; then
+    echo "cargo run failed. Please check your Cargo configuration."
+    cd ..
+    rm -rf "$REPO_DIR"
+    exit 1
+  fi
+fi
+
+cd ..
+
+# If all is okay, add string to cairo_project.toml
+echo "$REPO_DIR ='deps/$REPO_DIR/src'" >> cairo_project.toml
+
+echo "Dependency installed successfully."

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Function to generate a random color code
+random_color() {
+  echo -e "\e[38;5;$(shuf -i 1-255 -n 1)m"
+}
+
+# Assign a random color to the entire "Cairo-Watch" text
+color=$(random_color)
+
+# Print "Starknet-Watch" in big characters using figlet with the assigned color
+IFS=$'\n'
+for line in $(figlet "Starknet"); do
+  echo -e "${color}${line}\e[0m"
+done

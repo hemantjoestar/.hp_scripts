@@ -1,0 +1,26 @@
+#!/bin/bash
+if [ "$#" -ne 1 ]; then
+  echo "Usage: Cairo-base <project-name>"
+  exit 1
+fi
+
+PROJECT_NAME=$1
+mkdir $PROJECT_NAME
+
+# Create Makefile
+cat > "${PROJECT_NAME}/Makefile" << 'EOL'
+.PHONY: default
+
+# Default target
+default: test format
+
+# Test the project
+test:
+	cairo-test .
+
+test_with_args:
+	cairo-test . $(ARGS)
+
+format:
+	cairo-format --recursive src/*
+EOL

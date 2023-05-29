@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -o pipefail
 cairo-watch-header
 # Function to execute commands and handle errors
@@ -26,7 +25,8 @@ execute_command() {
 }
 
 if [ $# -eq 0 ]; then
-  command="make"
+	# verbose output
+  command="make 2>&1 | head -n 15"
 else
   ARGS="$@"
   command="make test_with_args ARGS=\"$ARGS\""
@@ -37,17 +37,3 @@ fallback_command="cairo-format src/** --print-parsing-errors"
 
 # Execute commands
 execute_command "$command" "$fallback_command"
-
-##!/bin/bash
-
-#set -e
-#set -o pipefail
-
-#trap 'echo "Error: Command failed at line $LINENO"; exit 1' ERR
-
-#if [ $# -eq 0 ]; then
-#  make
-#else
-#  ARGS="$@"
-#  make test_with_args ARGS="$ARGS"
-#fi

@@ -1,73 +1,42 @@
 #!/bin/bash
 
-if [ "$#" -ne 1 ]; then
-    echo "Usage: cairo-new <project-name>"
-    exit 1
+# Check number of arguments
+if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
+	echo "Usage: cairo-new [--starknet|--polygon] <project-name>"
+	exit 1
 fi
 
-PROJECT_NAME=$1
-
-# Create directory structure
-mkdir -p "${PROJECT_NAME}/src/tests"
-
-# Create cairo_project.toml
-cat > "${PROJECT_NAME}/cairo_project.toml" << EOL
-[crate_roots]
-${PROJECT_NAME}='src'
-EOL
-
-# Create Makefile
-cat > "${PROJECT_NAME}/Makefile" << 'EOL'
-.PHONY: default
-
-# Default target
-default: test format
-
-# Test the project
-test:
-	cairo-test .
-
-test_with_args:
-	cairo-test . $(ARGS)
-
-format:
-	cairo-format --recursive src/*
-EOL
-
-# Create src/lib.cairo
-cat > "${PROJECT_NAME}/src/lib.cairo" << EOL
-mod ${PROJECT_NAME};
-mod tests;
-EOL
-
-# Create src/tests.cairo
-touch "${PROJECT_NAME}/src/${PROJECT_NAME}.cairo"
-
-# Create src/tests.cairo
-touch "${PROJECT_NAME}/src/tests.cairo"
-
-# Create src/tests/tests_$PROJECT_NAME.cairo
-cat > "${PROJECT_NAME}/src/tests/tests_$PROJECT_NAME.cairo" << EOL
-// Uncomment and appendline as required
-// use $PROJECT_NAME::$PROJECT_NAME;
-#[test]
-fn
-EOL
-
-echo "mod tests_${PROJECT_NAME};" > "${PROJECT_NAME}/src/tests.cairo"
-
-echo "Cairo project '${PROJECT_NAME}' has been created."
-
-# Prompt the user
-read -p "Do you want to open test file? [y/N] " response
-
-# Check the response
-if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]
-then
-    echo "You chose 'yes'. Loading with vim..."
-		vim ${PROJECT_NAME}/src/tests/tests_$PROJECT_NAME.cairo
-else
-    # If anything other than 'yes' or 'y', do not execute
-    echo "You chose 'no'. Command will not be executed."
-fi
+# Check first argument to decide the action
+case "$1" in
+	--starknet)
+		if [ "$#" -ne 2 ]; then
+			echo "Usage: cairo-new --starknet <project-name>"
+			exit 1
+		fi
+		if [ "$2" == "test" ]; then
+			echo "Error: Do not name the project as 'test'."
+			exit 1
+		fi
+		echo "Executing for Starknet Project..."
+		# Use the command with --starknet here, "$2" will be the <project-name>
+		starknet-new $2
+		cairo-gitsubmodules $2
+		cairo-common $2 STARKNET
+		;;
+	*)
+		if [ "$#" -ne 1 ]; then
+			echo "Usage: cairo-new <project-name>"
+			exit 1
+		fi
+		if [ "$1" == "test" ]; then
+			echo "Error: Do not name the project as 'test'."
+			exit 1
+		fi
+		echo "Executing for Cairo Project..."
+		# Use the normal command here, "$1" will be the <project-name>
+		cairo-base $1
+		cairo-gitsubmodules $1
+		cairo-common $1 CAIRO
+		;;
+esac
 

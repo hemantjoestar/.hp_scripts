@@ -1,0 +1,47 @@
+#!/bin/bash
+PROJECT_NAME=$1
+PROJECT_TYPE=$2
+
+mkdir $PROJECT_NAME/src
+
+# Create cairo_project.toml
+cat > "${PROJECT_NAME}/cairo_project.toml" << EOL
+[crate_roots]
+${PROJECT_NAME}='src'
+EOL
+
+# Create src/lib.cairo
+cat > "${PROJECT_NAME}/src/lib.cairo" << EOL
+mod ${PROJECT_NAME};
+mod tests;
+EOL
+
+touch "${PROJECT_NAME}/src/${PROJECT_NAME}.cairo"
+
+# Create src/tests.cairo
+touch "${PROJECT_NAME}/src/tests.cairo"
+echo "mod tests_${PROJECT_NAME};" > "${PROJECT_NAME}/src/tests.cairo"
+mkdir -p "${PROJECT_NAME}/src/tests"
+
+# Create src/tests/tests_$PROJECT_NAME.cairo
+cat > "${PROJECT_NAME}/src/tests/tests_$PROJECT_NAME.cairo" << EOL
+// Uncomment and appendline as required
+// use $PROJECT_NAME::$PROJECT_NAME;
+// #[test]
+// fn
+EOL
+
+# Prompt the user
+read -p "Do you want to open test file? [y/N] " response
+
+# Check the response
+if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]
+then
+  echo "You chose 'yes'. Loading with vim..."
+  vim ${PROJECT_NAME}/src/tests/tests_$PROJECT_NAME.cairo
+else
+  # If anything other than 'yes' or 'y', do not execute
+  echo "You chose 'no'. Command will not be executed."
+fi
+
+echo "${PROJECT_TYPE} project '${PROJECT_NAME}' has been created."
