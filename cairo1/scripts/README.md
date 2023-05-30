@@ -12,7 +12,9 @@ Not all scripts are meant to be called standalone. Most are helper scripts.
   - `cairo-install-dependency <repo> [commit bash]`
   - managed using git submodules into a folder under root called `deps`
 4. For Development
-  - Cairo Project `cairo-watch`
+  - Cairo Project `cairo-watch`. 
+  - To pass cairo args ex. `cairo-watch --filter <string>`
+  - To view cairo prints `cairo-watch [cairo-args] --debug-print`
   - Starknet Project `starknet-watch`
   - TODO: unify make-commands scripts for above
   

@@ -4,43 +4,59 @@ cairo-watch-header
 
 # Function to execute commands and handle errors
 execute_command() {
-	local command="$1"
-	local output
-	output=$(eval "$command" 2>&1)
+	output=$(eval "make compile" 2>&1)
 	status=$?
 	if [ $status -ne 0 ]; then
-		# Need to see all errors
-		echo -e "\033[31mTESTING ERROR\033[0m"
-		# Only which tests failed
-		echo "$output" | awk '/failures:/,/make: \*\*\* .* Error/'
+		# I dont want to see all errors
+		echo -e "\033[31mCOMPILATION ERROR\033[0m"
+		echo "$output" | head -n 15
 		exit 1
 	else
 		# Command exited successfully
-		echo -e "\033[32mALL TEST PASS\033[0m"
-		# echo "$output"
+		echo -e "\033[32mCOMPILATION OK\033[0m"
+	fi
+	command="$1"
+	output=$(eval "$command" 2>&1)
+	status=$?
+	# Error
+	if [ $status -ne 0 ]; then
+		echo -e "\033[31mTESTING ERROR\033[0m"
+		if [ $2 -eq 1 ]; then
+			# Need to see all errors
+			echo "$output"
+		else
+			echo "$output" | awk '/failures:/,/make: \*\*\* .* Error/'
+		fi
+	else
+		# Command exited successfully
+		if [ $2 -eq 1 ]; then
+			# Need to see all prints
+			echo "$output"
+		else
+			echo -e "\033[32mALL TEST PASS\033[0m"
+		fi
 	fi
 }
+
+filtered_args=()
+should_debug_print=0
+for arg in "$@"; do
+	if [ "$arg" != '--debug-print' ]; then
+		filtered_args+=("$arg")
+	else
+		should_debug_print=1
+	fi
+done
+
+# Combine the filtered arguments into a single string
+ARGS="${filtered_args[*]}"
 
 if [ $# -eq 0 ]; then
 	command="make"
 else
-	ARGS="$@"
+	# Pass the ARGS string to the make command
 	command="make test_with_args ARGS=\"$ARGS\""
 fi
 
 # Execute command
-# execute_command "make compile"
-
-output=$(eval "make compile" 2>&1)
-status=$?
-if [ $status -ne 0 ]; then
-	# I dont want to see all errors
-	echo -e "\033[31mCOMPILATION ERROR\033[0m"
-	echo "$output" | head -n 15
-	exit 1
-else
-	# Command exited successfully
-	echo -e "\033[32mCOMPILATION OK\033[0m"
-	# echo "$output"
-fi
-execute_command "$command"
+execute_command "$command" $should_debug_print
