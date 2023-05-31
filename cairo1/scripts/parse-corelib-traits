@@ -2,8 +2,8 @@
 
 # TODO: Dont call alone. will destroy stuff. Fix this
 
+# not used
 working_folder="$1"
-cd $working_folder
 mkdir -p .cairo1_vim
 
 # Replace `tags_file` with the path to your ctags file
@@ -18,20 +18,67 @@ corelib_traits_snippets="./.cairo1_vim/cairo1.snippets"
 
 # Read the ctags file line by line
 while read -r line; do
-  # Check if the line ends with 't'
-  if [[ $line =~ .*\;\"[[:space:]]t$ ]]; then
-    # Extract the required strings
-    trait_name=$(echo "$line" | awk -F'\t' '{print $1}')
-    file_path=$(echo "$line" | awk -F'\t' '{print $2}')
-    array_name=$(basename "$file_path" | cut -d '.' -f1)
+	# Specific for traits
+	# Check if the line ends with 't'
+	# as per ctags file for cairo
+	if [[ $line =~ .*\;\"[[:space:]]t$ ]]; then
+		# Extract the required strings
+		# since ctags file line fields seperated by tabs
+		trait_name=$(echo "$line" | awk -F'\t' '{print $1}')
+		file_path=$(echo "$line" | awk -F'\t' '{print $2}')
+		mod_name=$(basename "$file_path" | cut -d '.' -f1)
 
-    # Append the trait_name in lowercase to corelib_completions_file
-    echo "${trait_name,,}" >> $corelib_completions_file
+	# Append the trait_name in lowercase to corelib_completions_file
+	echo "${trait_name,,}" >> $corelib_completions_file
 
-    # Append the snippet to corelib_traits_snippets
-    echo "snippet ${trait_name,,} \"$trait_name\" b" >> $corelib_traits_snippets
-    echo "use $array_name::${trait_name};" >> $corelib_traits_snippets
-    echo "endsnippet" >> $corelib_traits_snippets
-    echo "" >> $corelib_traits_snippets
-  fi
+	# Append the snippet to corelib_traits_snippets
+	echo "snippet ${trait_name,,} \"$trait_name\" b" >> $corelib_traits_snippets
+	echo "use $mod_name::${trait_name};" >> $corelib_traits_snippets
+	echo "endsnippet" >> $corelib_traits_snippets
+	echo "" >> $corelib_traits_snippets
+	fi
+	# Specific for externs. particularly useful in starknet
+	# Check if the line ends with 'x'
+	# as per ctags file for cairo
+	if [[ $line =~ .*\;\"[[:space:]]x$ ]]; then
+		# Extract the required strings
+		extern_func_name=$(echo "$line" | awk -F'\t' '{print $1}')
+		file_path=$(echo "$line" | awk -F'\t' '{print $2}')
+		if [[ $line =~ starknet ]]; then
+			mod_name='starknet'
+		else
+			mod_name=$(basename "$file_path" | cut -d '.' -f1)
+		fi
+
+	# Append the extern_func_name in lowercase to corelib_completions_file
+	echo "${extern_func_name,,}" >> $corelib_completions_file
+
+	# Append the snippet to corelib_traits_snippets
+	echo "snippet ${extern_func_name,,} \"$extern_func_name\" b" >> $corelib_traits_snippets
+	echo "use $mod_name::${extern_func_name};" >> $corelib_traits_snippets
+	echo "endsnippet" >> $corelib_traits_snippets
+	echo "" >> $corelib_traits_snippets
+	fi
+	# Specific for extern types. particularly useful in starknet
+	# Check if the line ends with 'y'
+	# as per ctags file for cairo
+	if [[ $line =~ .*\;\"[[:space:]]y$ ]]; then
+		# Extract the required strings
+		extern_type_name=$(echo "$line" | awk -F'\t' '{print $1}')
+		file_path=$(echo "$line" | awk -F'\t' '{print $2}')
+		if [[ $line =~ starknet ]]; then
+			mod_name='starknet'
+		else
+			mod_name=$(basename "$file_path" | cut -d '.' -f1)
+		fi
+
+	# Append the extern_type_name in lowercase to corelib_completions_file
+	echo "${extern_type_name,,}" >> $corelib_completions_file
+
+	# Append the snippet to corelib_traits_snippets
+	echo "snippet ${extern_type_name,,} \"$extern_type_name\" b" >> $corelib_traits_snippets
+	echo "use $mod_name::${extern_type_name};" >> $corelib_traits_snippets
+	echo "endsnippet" >> $corelib_traits_snippets
+	echo "" >> $corelib_traits_snippets
+	fi
 done < $ctags_file
