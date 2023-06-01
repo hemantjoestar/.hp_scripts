@@ -16,7 +16,7 @@ GIT_REPO=$1
 COMMIT_HASH=$2
 REPO_DIR="$(basename "$GIT_REPO" .git)"
 DEPENDENCY_FOLDER="./deps"
-FOLDER=$DEPENDENCY_FOLDER.$REPO_DIR
+FOLDER=$DEPENDENCY_FOLDER/$REPO_DIR
 
 # Check for existence of cairo_project.toml
 if [ ! -f "cairo_project.toml" ]; then
@@ -27,7 +27,7 @@ fi
 mkdir -p deps
 # Check if repo already downloaded
 if [ -d "$FOLDER" ]; then
-    echo "Git repo '$FOLDER' already installed."
+    echo -e "Git repo '$FOLDER' already installed. \nUse git push --set-upstream origin main to update dependency if needed"
     exit 1
 fi
 # Clone the git repository
@@ -37,6 +37,7 @@ if [ "$?" -ne 0 ]; then
   exit 1
 fi
 
+root_dir=$(pwd)
 cd "$FOLDER"
 
 # Checkout a specific commit if it's provided
@@ -44,7 +45,6 @@ if [ ! -z "$COMMIT_HASH" ]; then
   git checkout "$COMMIT_HASH"
   if [ "$?" -ne 0 ]; then
     echo "Failed to checkout commit. Please check the commit hash."
-    cd ..
     rm -rf "$REPO_DIR"
     exit 1
   fi
@@ -55,7 +55,6 @@ if [ -f "src/tests.cairo" ]; then
   cairo-test .
   if [ "$?" -ne 0 ]; then
     echo "cairo-test failed. Please check the Cairo tests."
-    cd ..
     # rm -rf "$REPO_DIR"
     exit 1
   fi
@@ -69,9 +68,8 @@ else
   fi
 fi
 
-cd ..
-
+cd "$root_dir"
 # If all is okay, add string to cairo_project.toml
-echo "$REPO_DIR ='deps/$REPO_DIR/src'" >> cairo_project.toml
+echo "$REPO_DIR='deps/$REPO_DIR/src'" >> cairo_project.toml
 
 echo "Dependency installed successfully."

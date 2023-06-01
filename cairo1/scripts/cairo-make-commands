@@ -16,20 +16,27 @@ execute_command() {
 		echo -e "\033[32mCOMPILATION OK\033[0m"
 	fi
 	command="$1"
+	debug_print=$2
 	output=$(eval "$command" 2>&1)
 	status=$?
 	# Error
 	if [ $status -ne 0 ]; then
 		echo -e "\033[31mTESTING ERROR\033[0m"
-		if [ $2 -eq 1 ]; then
+		if [ $debug_print -eq 1 ]; then
 			# Need to see all errors
 			echo "$output"
 		else
-			echo "$output" | awk '/failures:/,/make: \*\*\* .* Error/'
+			output=$(echo "$output" | awk '/failures:/,/make: \*\*\* .* Error/')
+			if [[ -z "$output" ]]; then
+				echo -e "Passed some wrong arguments. Allowed \n --debug-print"
+			else
+				echo "$output"
+			fi
+
 		fi
 	else
 		# Command exited successfully
-		if [ $2 -eq 1 ]; then
+		if [ $debug_print -eq 1 ]; then
 			# Need to see all prints
 			echo "$output"
 		else
@@ -52,10 +59,10 @@ done
 ARGS="${filtered_args[*]}"
 
 if [ $# -eq 0 ]; then
-	command="make"
+	command="unbuffer make"
 else
 	# Pass the ARGS string to the make command
-	command="make test_with_args ARGS=\"$ARGS\""
+	command="unbuffer make test_with_args ARGS=\"$ARGS\""
 fi
 
 # Execute command

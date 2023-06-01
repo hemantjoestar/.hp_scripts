@@ -19,10 +19,10 @@ execute_command() {
 }
 
 if [ $# -eq 0 ]; then
-	command="make"
+	command="unbuffer make"
 else
 	ARGS="$@"
-	command="make test_with_args ARGS=\"$ARGS\""
+	command="unbuffer make test_with_args ARGS=\"$ARGS\""
 fi
 
 # Execute command
