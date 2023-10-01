@@ -1,8 +1,9 @@
 #!/bin/bash
 
+project_names_not_allowed=("test","keccak")
 # Check number of arguments
 if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
-	echo "Usage: cairo-new [--starknet|--polygon] <project-name>"
+	echo "Usage: cairo-new [--starknet] <project-name>"
 	exit 1
 fi
 
@@ -13,10 +14,12 @@ case "$1" in
 			echo "Usage: cairo-new --starknet <project-name>"
 			exit 1
 		fi
-		if [ "$2" == "test" ]; then
-			echo "Error: Do not name the project as 'test'."
-			exit 1
-		fi
+		for element in "${project_names_not_allowed[@]}"; do
+			if [[ $2 == $element ]]; then
+				echo "Error: Do not name the project as 'test'."
+				exit 1
+			fi
+		done
 		echo "Executing for Starknet Project..."
 		# Use the command with --starknet here, "$2" will be the <project-name>
 		starknet-new $2

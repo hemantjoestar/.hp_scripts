@@ -31,7 +31,8 @@ if [ -d "$FOLDER" ]; then
     exit 1
 fi
 # Clone the git repository
-git submodule add -f  "$GIT_REPO" "$FOLDER"
+git submodule add "$GIT_REPO" "$FOLDER"
+
 if [ "$?" -ne 0 ]; then
   echo "Failed to clone repository. Please check the URL."
   exit 1
@@ -52,17 +53,10 @@ fi
 
 # TODO: Check if starknet or cairo repo and test accordingly
 if [ -f "src/tests.cairo" ]; then
-  cairo-test .
-  if [ "$?" -ne 0 ]; then
-    echo "cairo-test failed. Please check the Cairo tests."
-    # rm -rf "$REPO_DIR"
-    exit 1
-  fi
-else
+	# --staknet is blanket catch all
   cairo-test --starknet .
   if [ "$?" -ne 0 ]; then
-    echo "cargo run failed. Please check your Cargo configuration."
-    cd ..
+    echo "cairo-test failed. Please check the Cairo tests."
     rm -rf "$REPO_DIR"
     exit 1
   fi

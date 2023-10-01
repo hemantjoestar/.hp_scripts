@@ -3,8 +3,9 @@ PROJECT_NAME=$1
 
 # Create .gitignore
 touch ./${PROJECT_NAME}/.gitignore
+echo -e "artifacts/\ntags/" >> ./${PROJECT_NAME}/.gitignore
 
 # Create README
 touch "${PROJECT_NAME}/README.md"
-SUBMODULE_STRING="if submodules: git submodule update --init --recursive"
+SUBMODULE_STRING="if submodules: git submodule update --remote --merge --init --recursive"
 echo $SUBMODULE_STRING >> "${PROJECT_NAME}/README.md"

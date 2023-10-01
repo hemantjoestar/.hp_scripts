@@ -9,8 +9,6 @@ mkdir $PROJECT_NAME
 
 # Create Makefile
 cat > "${PROJECT_NAME}/Makefile" << 'EOL'
-PROJECT_NAME := $(shell echo $$PROJECT_NAME)
-
 .PHONY: default
 
 # Default target
@@ -28,5 +26,6 @@ format:
 
 compile:
 	@mkdir -p artifacts
-	@starknet-compile --allowed-libfuncs-list-name experimental_v0.1.0 . artifacts/$(PROJECT_NAME).json
 EOL
+echo "	@starknet-compile --allowed-libfuncs-list-name all src/$PROJECT_NAME.cairo artifacts/$PROJECT_NAME.json" >> ${PROJECT_NAME}/Makefile
+	

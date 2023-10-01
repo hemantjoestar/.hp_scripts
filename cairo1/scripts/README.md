@@ -23,5 +23,6 @@ TODO:
   - To pass cairo args ex. `cairo-watch --filter <string>`
   - To view cairo prints `cairo-watch [cairo-args] --debug-print`
   - Starknet Project `starknet-watch`
+  - For multiple starknet contracts. Change `Makefile` accordingly
   - TODO: unify make-commands scripts for above
   

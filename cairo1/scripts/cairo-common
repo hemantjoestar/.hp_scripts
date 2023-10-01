@@ -25,12 +25,23 @@ mkdir -p "${PROJECT_NAME}/src/tests"
 
 # Create src/tests/tests_$PROJECT_NAME.cairo
 cat > "${PROJECT_NAME}/src/tests/tests_$PROJECT_NAME.cairo" << EOL
-// Uncomment and appendline as required
-// use $PROJECT_NAME::$PROJECT_NAME;
-// #[test]
-// fn
+/// Uncomment and appendline as required
+/// use $PROJECT_NAME::$PROJECT_NAME;
+/// #[test]
+/// fn
 EOL
 
+root_dir=$(pwd)
+cd $PROJECT_NAME
+# init git repo
+git init
+git add .gitignore
+git add cairo_project.toml
+git add src/*
+git add Makefile
+git add README.md
+
+cd $root_dir
 # Prompt the user
 read -p "Do you want to open test file? [y/N] " response
 
