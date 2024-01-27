@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Wait for X server to start
+sleep 3
+
+# Get the touch_screen_id of the device
+touch_screen_id=$(xinput list | grep "ELAN901C:00 04F3:2E9A" | awk -F'=' '{print $2}' | awk '{print $1}')
+echo $touch_screen_id
+
+touchpad_id=$(xinput list | grep "ELAN0678:00 04F3:3195 Touchpad" | awk -F'=' '{print $2}' | awk '{print $1}')
+echo $touchpad_id
+
+# Disable the device using xinput
+if [ ! -z "$touch_screen_id" ]; then
+	xinput disable "$touch_screen_id"
+	xinput disable "$touchpad_id"
+fi
+
