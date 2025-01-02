@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# Function to show usage
+show_usage() {
+    echo "Usage: $0 <input_folder> <prefix> <output_folder>"
+    echo "Example: $0 ./examples examples~my-crate ./output"
+    echo "Filenamed: examples~mycrate~filename"
+    exit 1
+}
+
+# Check if correct number of arguments is provided
+if [ "$#" -ne 3 ]; then
+    show_usage
+fi
+
+input_folder="$1"
+prefix="$2"
+output_folder="$3"
+
+# Check if input folder exists
+if [ ! -d "$input_folder" ]; then
+    echo "Error: Input directory '$input_folder' does not exist"
+    exit 1
+fi
+
+# Create output directory
+mkdir -p "$output_folder"
+
+# Find all Rust files in the input directory and copy them with new names
+find "$input_folder" -type f -name "*.rs" | while read -r file; do
+    # Get just the filename without the path
+    filename=$(basename "$file")
+    
+    # Create new filename with prefix
+    new_filename="${prefix}~${filename}"
+    
+    # Copy the file with new name
+    cp "$file" "${output_folder}/${new_filename}"
+    
+    echo "Copied: $file -> ${output_folder}/${new_filename}"
+done
+
+echo "Done! Files have been copied to the ${output_folder} directory"

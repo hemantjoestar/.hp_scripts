@@ -2,7 +2,7 @@
 xrandr_info="$(xrandr -q)"
 xrandr --auto
 # xrandr --output eDP-1 --mode 1680x1050
-xrandr --output eDP --mode 1680x1050
+# xrandr --output eDP --mode 1680x1050
 if [[ $xrandr_info == *"HDMI-1 connected"* ]]; then
   echo "HDMI-1 found"
   # xrandr --output LVDS-1 --off;
@@ -28,7 +28,7 @@ if [[ $xrandr_info == *"DisplayPort-0 connected"* ]]; then
   # xrandr --output hdmi-1 --auto --primary --rotate left;
   # xrandr --output displayport-0 --rotate left --right-of edp;
   # xrandr --output displayport-1 --auto --right-of  eDP;
-  xrandr --output DisplayPort-0 --auto --above  eDP;
+  xrandr --output DisplayPort-0 --scale 2x2 --above  eDP;
   # xrandr --output hdmi-1 --auto --primary --rotate normal;
   # xrandr --output hdmi-3 --auto;
   # xrandr --output hdmi-2 --left-of hdmi-1;

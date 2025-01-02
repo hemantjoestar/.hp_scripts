@@ -1,0 +1,33 @@
+#!/bin/bash
+
+shot_name=$(echo $(od -An -N3 -i /dev/random))'_scrot.png'
+path_to_append="/home/$USER/screen-grabs/"
+scrot $shot_name -e 'mv $f '$path_to_append -s
+# $ <command> && echo SUCCESS || echo FAIL
+if [ $? -eq 0 ]; then
+  echo OK
+  # TODO: dumps newline to xclip, to fix
+  echo $path_to_append$shot_name | xclip -sel clip
+  echo $path_to_append$shot_name | xclip -sel primary
+  echo $path_to_append$shot_name " to system clipboard using xclip"
+else
+  echo "Screen not grabbed"
+fi
+
+# X11 clipboard selections:
+# PRIMARY (XA_PRIMARY):
+
+# This is what you get when you select text with your mouse
+# Pasted using middle-click or Shift+Insert
+# Designed for quick, temporary copy/paste operations
+# No explicit "copy" action needed - just selecting text puts it in PRIMARY
+# Often called the "select buffer" or "highlight buffer"
+
+# CLIPBOARD:
+
+# This is what most people think of as the "system clipboard"
+# Used with Ctrl+C (copy) and Ctrl+V (paste)
+# More similar to Windows/Mac clipboard behavior
+# Requires explicit copy action (usually Ctrl+C)
+# Contents persist until explicitly overwritten
+# Often used for more intentional copy/paste operations

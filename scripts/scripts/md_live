@@ -1,0 +1,127 @@
+#!/bin/bash
+
+# Check if a file is provided as an argument
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <input_markdown_file>"
+    exit 1
+fi
+
+input_file="$1"
+output_dir="$HOME/tmp/md_viewer"
+output_file="$output_dir/output.html"
+
+# Check if cmark is installed
+if ! command -v cmark &> /dev/null; then
+    echo "Error: cmark is not installed. Please install it and try again."
+    exit 1
+fi
+
+# Create the output directory if it doesn't exist
+mkdir -p "$output_dir"
+
+# Convert Markdown to HTML using cmark
+# to work with iframe --unsafe flag added
+if cmark-gfm -t html --unsafe --hardbreaks --smart "$input_file" > "$output_file"; then
+# if cmark -t html --hardbreaks --safe --smart "$input_file" > "$output_file"; then
+    echo "Conversion successful."
+else
+    echo "Error: Conversion failed."
+    exit 1
+fi
+
+# Prepend the script to the HTML file
+temp_file=$(mktemp)
+# echo '<script>setTimeout(function(){location.reload()},2000);</script>' > "$temp_file"
+# Prepend the script and dark mode styles to the HTML file
+temp_file=$(mktemp)
+# had to move following comments out since gets printed to generated html
+# due to ues of --unsafe flag
+# Logic for Dark Mode
+# Logic for refresh button css
+# Logic for refresh button onclick
+cat << EOF > "$temp_file"
+<style>
+body {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    padding: 20px;
+}
+a { color: #61dafb; }
+pre, code {
+    background-color: #2b2b2b;
+    border: 1px solid #444;
+    padding: 2px 5px;
+}
+</style>
+
+<style>
+        #refreshToggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            padding: 10px;
+            background-color:#28a745 ;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        #refreshToggle:hover {
+            opacity: 1;
+        }
+    </style>
+<button id="refreshToggle">Auto Refresh is On</button>
+
+<script>
+    let refreshInterval=
+	setInterval(() => {
+            location.reload();
+        }, 2000);
+    const toggleButton = document.getElementById('refreshToggle');
+
+    let isRefreshing = true;
+
+    function startRefresh() {
+        refreshInterval = setInterval(() => {
+            location.reload();
+        }, 2000);
+        isRefreshing = true;
+        toggleButton.textContent = 'Auto Refresh is On';
+        toggleButton.style.backgroundColor = '#28a745';
+    }
+
+    function stopRefresh() {
+        clearInterval(refreshInterval);
+        isRefreshing = false;
+        toggleButton.textContent = 'Auto Refresh is Off';
+        toggleButton.style.backgroundColor = '#007bff';
+    }
+
+    toggleButton.addEventListener('click', () => {
+		console.log(isRefreshing);
+        if (isRefreshing) {
+            stopRefresh();
+        } else {
+            startRefresh();
+        }
+    });
+</script>
+</body>
+</html>
+EOF
+cat "$output_file" >> "$temp_file"
+
+# Only overwrite the output file if the above operations were successful
+if mv "$temp_file" "$output_file"; then
+    echo "Script prepended successfully."
+    echo "Conversion complete. Output saved to $output_file"
+else
+    echo "Error: Failed to prepend script to the HTML file."
+    rm "$temp_file"  # Clean up the temp file if move failed
+    exit 1
+fi
