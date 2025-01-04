@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Define output directory
+output_dir="claude_flattened"
+
+# Remove output directory if it exists
+rm -rf "$output_dir"
+
+# Create fresh output directory
+mkdir -p "$output_dir"
+
+# Find all files under src, excluding the directory itself
+find src -type f | while read -r file; do
+    # Remove 'src/' prefix and replace all '/' with '~'
+    flat_name=$(echo "$file" | sed 's|^src/||' | tr '/' '~')
+    # Add src~ prefix back
+    flat_name="src~$flat_name"
+    # Copy file to output directory with new name
+    cp "$file" "$output_dir/$flat_name"
+done
+
+echo "Files have been flattened into the '$output_dir' directory"

@@ -1,0 +1,33 @@
+#!/usr/bin/bash
+
+# Install Axum with macros feature
+cargo add axum --features macros
+
+# Install SQLx with required features
+cargo add sqlx --features runtime-tokio,tls-native-tls,sqlite,uuid
+
+# Install Tokio with full features
+cargo add tokio --features full
+
+# Install Tower with util feature
+cargo add tower --features util
+
+# Install Tower-http with trace feature
+cargo add tower-http --features trace
+
+# Install UUID with v7 and serde features
+cargo add uuid --features v7,serde
+
+# Install Serde with derive feature
+cargo add serde --features derive
+
+# Install additional dependencies
+cargo add serde_json
+cargo add tracing
+
+# Install tracing-subscriber with env-filter feature
+cargo add tracing-subscriber --features env-filter
+
+# Install thiserror 
+cargo add thiserror
+echo "All dependencies have been installed successfully!"

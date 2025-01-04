@@ -1,0 +1,77 @@
+#!/bin/bash
+
+# Function to show usage
+show_usage() {
+    echo "Usage: $0 <examples_folder> <crate_name> <output_folder>"
+    echo "Example: $0 ./examples my-crate ./output"
+    echo ""
+    echo "This script will:"
+    echo "1. Look for Rust projects in the examples folder"
+    echo "2. Find main.rs in each project's src directory"
+    echo "3. Copy and rename them as 'examples~<crate_name>~<example_name>.rs'"
+    exit 1
+}
+
+# Check if correct number of arguments is provided
+if [ "$#" -ne 3 ]; then
+    show_usage
+fi
+
+examples_folder="$1"
+crate_name="$2"
+output_folder="$3"
+
+# Check if examples folder exists
+if [ ! -d "$examples_folder" ]; then
+    echo "Error: Examples directory '$examples_folder' does not exist"
+    exit 1
+fi
+
+# Create output directory
+mkdir -p "$output_folder"
+
+# Function to process an example project
+process_example() {
+    local example_path="$1"
+    local example_name=$(basename "$example_path")
+    local main_rs_path="${example_path}/src/main.rs"
+    
+    # Check if this is actually a Rust project (has src/main.rs)
+    if [ -f "$main_rs_path" ]; then
+        # Create new filename with prefix
+        local new_filename="examples~${crate_name}~${example_name}.rs"
+        
+        # Copy the file with new name
+        cp "$main_rs_path" "${output_folder}/${new_filename}"
+        
+        echo "Processed example '$example_name'"
+        echo "  Source: $main_rs_path"
+        echo "  Target: ${output_folder}/${new_filename}"
+        echo "---"
+    else
+        echo "Warning: No src/main.rs found in $example_path"
+        echo "---"
+    fi
+}
+
+# Find all directories in the examples folder
+echo "Processing examples from: $examples_folder"
+echo "Using crate name: $crate_name"
+echo "Output folder: $output_folder"
+echo "==="
+
+for example_dir in "$examples_folder"/*/; do
+    if [ -d "$example_dir" ]; then
+        process_example "$example_dir"
+    fi
+done
+
+# Check if any files were copied
+file_count=$(ls -1 "$output_folder"/*.rs 2>/dev/null | wc -l)
+if [ "$file_count" -gt 0 ]; then
+    echo "Successfully processed $file_count example(s)"
+    echo "Files have been copied to: $output_folder"
+else
+    echo "No valid examples were found to process"
+    echo "Please ensure your examples folder contains Rust projects with src/main.rs files"
+fi
