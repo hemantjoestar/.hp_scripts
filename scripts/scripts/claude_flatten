@@ -11,10 +11,12 @@ mkdir -p "$output_dir"
 
 # Find all files under src, excluding the directory itself
 find src -type f | while read -r file; do
+     # Extract the parent directory name
+	 current_folder=$(basename "$(pwd)")
     # Remove 'src/' prefix and replace all '/' with '~'
     flat_name=$(echo "$file" | sed 's|^src/||' | tr '/' '~')
     # Add src~ prefix back
-    flat_name="src~$flat_name"
+	flat_name="${current_folder}~src~${flat_name}"
     # Copy file to output directory with new name
     cp "$file" "$output_dir/$flat_name"
 done
